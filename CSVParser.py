@@ -70,6 +70,8 @@ class CSVParser ( Parser ):
             else:
                 return self.getTypedRuleContext(CSVParser.RowContext,i)
 
+        def rowCount(self):
+            return len(self.row())
 
         def EOF(self):
             return self.getToken(CSVParser.EOF, 0)
