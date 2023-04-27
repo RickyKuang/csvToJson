@@ -35,12 +35,12 @@ def parse_csv_to_json(input_file, output_file):
                     row_dict[headers[j]] = values[j]
                 rows.append(row_dict)
 
-            return {"data": rows}
+            return rows
 
     # "visitor" instance that will be used to traverse the parse tree.
     visitor = CSVToJSONVisitor()
     json_object = visitor.visitFile(parse_tree)
-    json_string = json.dumps(json_object)
+    json_string = json.dumps(json_object, indent=3)
 
     # write the JSON string to the output file.
     with open(output_file, 'w+') as f:
@@ -51,4 +51,4 @@ def parse_csv_to_json(input_file, output_file):
 
 
 # example usage of the function
-parse_csv_to_json('./csvFiles/honda_sell_data.csv', './jsonFiles/honda_sell_data.json')
+parse_csv_to_json('./csvFiles/fastfood.csv', './jsonFiles/fastfood.json')
