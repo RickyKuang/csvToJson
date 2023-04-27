@@ -1,56 +1,54 @@
 import json
-import os
 from antlr4 import *
 from CSVLexer import CSVLexer
 from CSVParser import CSVParser
 
+
 # Function that will parse a CSV file and return a JSON object
 def parse_csv_to_json(input_file, output_file):
-    #create a character stream from the input file.
+    # create a character stream from the input file.
     input_stream = FileStream(input_file, encoding='utf-8')
-    #create a lexer that reads from the input stream.
+    # create a lexer that reads from the input stream.
     lexer = CSVLexer(input_stream)
     lexer.delimiter = ','
-    #create a buffer of tokens that the parser will read from.
+    # create a buffer of tokens that the parser will read from.
     token_stream = CommonTokenStream(lexer)
-    #create a parser that reads from the token stream.
+    # create a parser that reads from the token stream.
     parser = CSVParser(token_stream)
-    #get the parse tree for the parser
+    # get the parse tree for the parser
     parse_tree = parser.file_()
 
-    #visitor class that will traverse the parse tree and convert it to a JSON object.
+    # visitor class that will traverse the parse tree and convert it to a JSON object.
     class CSVToJSONVisitor(ParseTreeVisitor):
-        def visitFile(self, ctx):
-            #headers will get the headers from the first row of the CSV file.
-            headers = ctx.row(0).toString(ruleNames=parser.ruleNames, stop=ctx.stop)
-            #empty list to hold the rows of data.
+        def visitFile(self, ctx: CSVParser.FileContext):
+            headers_ctx = ctx.row(0)
+            headers = [header.getText() for header in headers_ctx.field()]
+
             rows = []
+            for i in range(1, len(ctx.row())):
+                row_ctx = ctx.row(i)
+                row_text = row_ctx.getText()
+                values = [value.strip() for value in row_text.split(',')]
 
-            #iterate over the remaining rows of the CSV file.
-            for i in range(1, ctx.rowCount()):
-                #get the values from the current row of the CSV file.
-                values = ctx.row(i).string()
-                #dictionary representing the current row of data
-                row = {}
+                row_dict = {}
                 for j in range(len(headers)):
-                    row[headers[j]] = values[j]
-                #append the row to the list of rows.
-                rows.append(row)
-            #dictionary representing the final CSV file.
-            result = {"data": rows}
+                    row_dict[headers[j]] = values[j]
+                rows.append(row_dict)
 
-            return result
+            return {"data": rows}
 
-    #"visitor" instance that will be used to traverse the parse tree.
+    # "visitor" instance that will be used to traverse the parse tree.
     visitor = CSVToJSONVisitor()
-    json_object = visitor.visit(parse_tree)
+    json_object = visitor.visitFile(parse_tree)
     json_string = json.dumps(json_object)
 
-    #write the JSON string to the output file.
+    # write the JSON string to the output file.
     with open(output_file, 'w+') as f:
         f.write(json_string)
 
     # Return the JSON object.
     return json_object
 
-parse_csv_to_json('./csvFiles/fastfood.csv', './jsonFiles/fastfood.json')
+
+# example usage of the function
+parse_csv_to_json('./csvFiles/honda_sell_data.csv', './jsonFiles/honda_sell_data.json')

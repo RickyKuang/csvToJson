@@ -10,14 +10,15 @@ else:
 
 def serializedATN():
     return [
-        4,1,5,26,2,0,7,0,2,1,7,1,2,2,7,2,1,0,1,0,1,0,5,0,10,8,0,10,0,12,
-        0,13,9,0,1,0,3,0,16,8,0,1,0,1,0,1,1,1,1,1,1,1,1,1,2,1,2,1,2,0,0,
-        3,0,2,4,0,1,1,0,2,3,24,0,6,1,0,0,0,2,19,1,0,0,0,4,23,1,0,0,0,6,11,
-        3,2,1,0,7,8,5,4,0,0,8,10,3,2,1,0,9,7,1,0,0,0,10,13,1,0,0,0,11,9,
-        1,0,0,0,11,12,1,0,0,0,12,15,1,0,0,0,13,11,1,0,0,0,14,16,5,4,0,0,
-        15,14,1,0,0,0,15,16,1,0,0,0,16,17,1,0,0,0,17,18,5,0,0,1,18,1,1,0,
-        0,0,19,20,3,4,2,0,20,21,5,1,0,0,21,22,3,4,2,0,22,3,1,0,0,0,23,24,
-        7,0,0,0,24,5,1,0,0,0,2,11,15
+        4,1,5,30,2,0,7,0,2,1,7,1,2,2,7,2,1,0,1,0,1,0,5,0,10,8,0,10,0,12,
+        0,13,9,0,1,0,3,0,16,8,0,1,0,1,0,1,1,1,1,1,1,5,1,23,8,1,10,1,12,1,
+        26,9,1,1,2,1,2,1,2,0,0,3,0,2,4,0,1,1,0,2,3,29,0,6,1,0,0,0,2,19,1,
+        0,0,0,4,27,1,0,0,0,6,11,3,2,1,0,7,8,5,4,0,0,8,10,3,2,1,0,9,7,1,0,
+        0,0,10,13,1,0,0,0,11,9,1,0,0,0,11,12,1,0,0,0,12,15,1,0,0,0,13,11,
+        1,0,0,0,14,16,5,4,0,0,15,14,1,0,0,0,15,16,1,0,0,0,16,17,1,0,0,0,
+        17,18,5,0,0,1,18,1,1,0,0,0,19,24,3,4,2,0,20,21,5,1,0,0,21,23,3,4,
+        2,0,22,20,1,0,0,0,23,26,1,0,0,0,24,22,1,0,0,0,24,25,1,0,0,0,25,3,
+        1,0,0,0,26,24,1,0,0,0,27,28,7,0,0,0,28,5,1,0,0,0,3,11,15,24
     ]
 
 class CSVParser ( Parser ):
@@ -70,8 +71,6 @@ class CSVParser ( Parser ):
             else:
                 return self.getTypedRuleContext(CSVParser.RowContext,i)
 
-        def rowCount(self):
-            return len(self.row())
 
         def EOF(self):
             return self.getToken(CSVParser.EOF, 0)
@@ -181,15 +180,23 @@ class CSVParser ( Parser ):
 
         localctx = CSVParser.RowContext(self, self._ctx, self.state)
         self.enterRule(localctx, 2, self.RULE_row)
+        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 19
             self.field()
+            self.state = 24
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            while _la==1:
+                self.state = 20
+                self.match(CSVParser.T__0)
+                self.state = 21
+                self.field()
+                self.state = 26
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
 
-            self.state = 20
-            self.match(CSVParser.T__0)
-            self.state = 21
-            self.field()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -239,7 +246,7 @@ class CSVParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 23
+            self.state = 27
             _la = self._input.LA(1)
             if not(_la==2 or _la==3):
                 self._errHandler.recoverInline(self)
