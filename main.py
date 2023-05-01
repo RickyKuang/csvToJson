@@ -2,53 +2,53 @@ import json
 from antlr4 import *
 from CSVLexer import CSVLexer
 from CSVParser import CSVParser
-
+from CSVToJSONVisitor import CSVToJSONVisitor
+import chardet
+import csv
+import os
 
 # Function that will parse a CSV file and return a JSON object
-def parse_csv_to_json(input_file, output_file):
-    # create a character stream from the input file.
-    input_stream = FileStream(input_file, encoding='utf-8')
-    # create a lexer that reads from the input stream.
+def parse_csv_to_json(input_file, output_file, encoding, delimiter):
+    input_stream = FileStream(input_file, encoding=encoding)
     lexer = CSVLexer(input_stream)
-    lexer.delimiter = ','
-    # create a buffer of tokens that the parser will read from.
+    lexer.delimiter = delimiter
     token_stream = CommonTokenStream(lexer)
-    # create a parser that reads from the token stream.
     parser = CSVParser(token_stream)
-    # get the parse tree for the parser
     parse_tree = parser.file_()
 
-    # visitor class that will traverse the parse tree and convert it to a JSON object.
-    class CSVToJSONVisitor(ParseTreeVisitor):
-        def visitFile(self, ctx: CSVParser.FileContext):
-            headers_ctx = ctx.row(0)
-            headers = [header.getText() for header in headers_ctx.field()]
-
-            rows = []
-            for i in range(1, len(ctx.row())):
-                row_ctx = ctx.row(i)
-                row_text = row_ctx.getText()
-                values = [value.strip() for value in row_text.split(',')]
-
-                row_dict = {}
-                for j in range(len(headers)):
-                    row_dict[headers[j]] = values[j]
-                rows.append(row_dict)
-
-            return rows
-
-    # "visitor" instance that will be used to traverse the parse tree.
     visitor = CSVToJSONVisitor()
-    json_object = visitor.visitFile(parse_tree)
+    json_object = visitor.visitFile(parse_tree, delimiter)
     json_string = json.dumps(json_object, indent=3)
 
-    # write the JSON string to the output file.
     with open(output_file, 'w+') as f:
         f.write(json_string)
 
-    # Return the JSON object.
-    return json_object
+# ask user for filename input
+file_csv = ""
+file_json = ""
+request_file = True
+while request_file:
+    file_name = input('Please enter the CSV file name you would like to parse (don\'t include .csv): ')
+    file_csv = "./csvFiles/" + file_name + ".csv"
+    if not os.path.exists(file_csv):
+        print("The file you are looking for does not exist.")
+    else:
+        file_json = "./jsonFiles/" + file_name + ".json"
+        request_file = False
 
+# get the file's encoding
+with open(file_csv, 'rb') as csv_file:
+    result = chardet.detect(csv_file.read(10000))
+encoding = result['encoding']
+print("Encoding:", encoding)
 
-# example usage of the function
-parse_csv_to_json('./csvFiles/fastfood.csv', './jsonFiles/fastfood.json')
+# get the file's delimiter
+with open(file_csv, 'r', newline='', encoding=encoding) as csv_file:
+    first_line = csv_file.readline()
+dialect = csv.Sniffer().sniff(first_line)
+delimiter = dialect.delimiter
+print("Delimiter:", delimiter)
+
+# parse the csv to json
+parse_csv_to_json(file_csv, file_json, encoding, delimiter)
+print("Access", file_name+".json", "in the jsonFiles folder.")
