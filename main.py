@@ -52,3 +52,6 @@ print("Delimiter:", delimiter)
 # parse the csv to json
 parse_csv_to_json(file_csv, file_json, encoding, delimiter)
 print("Access", file_name+".json", "in the jsonFiles folder.")
+
+# add error handling for
+# check if is CSV file
