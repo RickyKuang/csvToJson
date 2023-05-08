@@ -33,7 +33,7 @@ class CSVParser ( Parser ):
 
     literalNames = [  ]
 
-    symbolicNames = [ "<INVALID>", "TEXT", "QUOTED_TEXT", "DELIMITER", "CRLF", 
+    symbolicNames = [ "<INVALID>", "TEXT", "QUOTED_TEXT", "DELIMITER", "END_ROW", 
                       "WHITESPACE" ]
 
     RULE_file = 0
@@ -46,7 +46,7 @@ class CSVParser ( Parser ):
     TEXT=1
     QUOTED_TEXT=2
     DELIMITER=3
-    CRLF=4
+    END_ROW=4
     WHITESPACE=5
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
@@ -75,11 +75,11 @@ class CSVParser ( Parser ):
         def EOF(self):
             return self.getToken(CSVParser.EOF, 0)
 
-        def CRLF(self, i:int=None):
+        def END_ROW(self, i:int=None):
             if i is None:
-                return self.getTokens(CSVParser.CRLF)
+                return self.getTokens(CSVParser.END_ROW)
             else:
-                return self.getToken(CSVParser.CRLF, i)
+                return self.getToken(CSVParser.END_ROW, i)
 
         def getRuleIndex(self):
             return CSVParser.RULE_file
@@ -116,7 +116,7 @@ class CSVParser ( Parser ):
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
                     self.state = 7
-                    self.match(CSVParser.CRLF)
+                    self.match(CSVParser.END_ROW)
                     self.state = 8
                     self.row() 
                 self.state = 13
@@ -128,7 +128,7 @@ class CSVParser ( Parser ):
             _la = self._input.LA(1)
             if _la==4:
                 self.state = 14
-                self.match(CSVParser.CRLF)
+                self.match(CSVParser.END_ROW)
 
 
             self.state = 17

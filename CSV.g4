@@ -1,9 +1,10 @@
 grammar CSV;
 
-file: row (CRLF row)* CRLF? EOF;
+file: row (END_ROW row)* END_ROW? EOF;
 row: field (DELIMITER field)*;
 field: TEXT | QUOTED_TEXT;
-TEXT: ~[,;\t| \r\n]*;
+TEXT: ~[,;\t| \n\r]*
+      (~[\n\r,] ~[,;\t| \n\r]*)*;
 QUOTED_TEXT: '"' ( ~["\r\n] | '""' )* '"';
 DELIMITER:
     ','
@@ -11,5 +12,5 @@ DELIMITER:
     | '|'
     | '\t'
     | ' ';
-CRLF: '\r'? '\n';
+END_ROW: '\r'? '\n';
 WHITESPACE: [ \t]+ -> skip;

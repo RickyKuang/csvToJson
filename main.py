@@ -7,11 +7,9 @@ import chardet
 import csv
 import os
 
-# Function that will parse a CSV file and return a JSON object
-def parse_csv_to_json(input_file, output_file, encoding, delimiter):
+def csv_to_json(input_file, output_file, encoding, delimiter):
     input_stream = FileStream(input_file, encoding=encoding)
     lexer = CSVLexer(input_stream)
-    lexer.delimiter = delimiter
     token_stream = CommonTokenStream(lexer)
     parser = CSVParser(token_stream)
     parse_tree = parser.file_()
@@ -20,8 +18,8 @@ def parse_csv_to_json(input_file, output_file, encoding, delimiter):
     json_object = visitor.visitFile(parse_tree, delimiter)
     json_string = json.dumps(json_object, indent=3)
 
-    with open(output_file, 'w+') as f:
-        f.write(json_string)
+    with open(output_file, 'w+') as json_file:
+        json_file.write(json_string)
 
 # ask user for filename input
 file_csv = ""
@@ -33,25 +31,29 @@ while request_file:
     if not os.path.exists(file_csv):
         print("The file you are looking for does not exist.")
     else:
-        file_json = "./jsonFiles/" + file_name + ".json"
-        request_file = False
+        try:
+            with open(file_csv, 'r') as csv_file:
+                csv_reader = csv.reader(csv_file)
+                next(csv_reader)
+
+                file_json = "./jsonFiles/" + file_name + ".json"
+                request_file = False
+        except (csv.Error, UnicodeDecodeError):
+            print("The file is not a valid CSV file. Please select a different file.")
 
 # get the file's encoding
 with open(file_csv, 'rb') as csv_file:
-    result = chardet.detect(csv_file.read(10000))
-encoding = result['encoding']
+    csv_detect = chardet.detect(csv_file.read(10000))
+encoding = csv_detect['encoding']
 print("Encoding:", encoding)
 
 # get the file's delimiter
-with open(file_csv, 'r', newline='', encoding=encoding) as csv_file:
-    first_line = csv_file.readline()
-dialect = csv.Sniffer().sniff(first_line)
-delimiter = dialect.delimiter
+with open(file_csv, 'r', encoding=encoding) as csv_file:
+    csv_file_line = csv_file.readline()
+csv_sniffer = csv.Sniffer().sniff(csv_file_line)
+delimiter = csv_sniffer.delimiter
 print("Delimiter:", delimiter)
 
 # parse the csv to json
-parse_csv_to_json(file_csv, file_json, encoding, delimiter)
+csv_to_json(file_csv, file_json, encoding, delimiter)
 print("Access", file_name+".json", "in the jsonFiles folder.")
-
-# add error handling for
-# check if is CSV file

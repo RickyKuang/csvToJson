@@ -3,10 +3,6 @@ from CSVParser import CSVParser
 
 class CSVToJSONVisitor(ParseTreeVisitor):
     def visitFile(self, ctx: CSVParser.FileContext, delimiter):
-        headers_ctx = ctx.row(0)
-        headers = [header.getText() for header in headers_ctx.field()]
-        print('headers', headers)
-
         def fix_row_text(row_ctx, delimiter):
             row_text = row_ctx.getText()
             values = []
@@ -25,13 +21,17 @@ class CSVToJSONVisitor(ParseTreeVisitor):
             values.append(current_value.strip())
             return values
 
-        rows = []
+        headers_ctx = ctx.row(0)
+        headers = fix_row_text(headers_ctx, delimiter)
+        print('headers', headers)
+
+        rows_as_json = []
         for i in range(1, len(ctx.row())):
             row_ctx = ctx.row(i)
             values = fix_row_text(row_ctx, delimiter)
             row_dict = {}
             for j in range(len(headers)):
                 row_dict[headers[j]] = values[j]
-            rows.append(row_dict)
+            rows_as_json.append(row_dict)
 
-        return rows
+        return rows_as_json
